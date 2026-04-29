@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sole Trader Rolling Tax Calc 2026/27</title>
+    <title>Sole Trader Rolling Tax Calc</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 p-4">
@@ -11,7 +11,13 @@
     <div class="max-w-4xl mx-auto space-y-6">
         <div class="bg-blue-900 rounded-2xl p-8 text-white shadow-xl text-center">
             <h1 class="text-3xl font-bold">Rolling Tax & Savings Pot</h1>
-            <p class="text-blue-200 mt-2">Personalized for the 2026/27 Tax Year</p>
+            <div class="mt-4 inline-flex items-center bg-blue-800 rounded-lg p-1 border border-blue-700">
+                <label class="px-3 text-xs font-bold text-blue-200">TAX YEAR:</label>
+                <select id="taxYear" class="bg-blue-900 text-white font-bold rounded p-1 outline-none text-sm cursor-pointer">
+                    <option value="2026">2026 / 2027</option>
+                    <option value="2025">2025 / 2026</option>
+                </select>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -25,11 +31,11 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold uppercase text-gray-500">Annual Gross PAYE Salary</label>
-                            <input type="number" id="payeIncome" placeholder="e.g. 30000" class="w-full mt-1 p-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                            <input type="number" id="payeIncome" placeholder="0" class="w-full mt-1 p-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase text-gray-500">Sole Trader Income (To Date)</label>
-                            <input type="number" id="stIncome" placeholder="e.g. 15000" class="w-full mt-1 p-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                            <input type="number" id="stIncome" placeholder="0" class="w-full mt-1 p-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase text-gray-500 text-red-500">Business Expenses (To Date)</label>
@@ -39,10 +45,10 @@
                             <label class="block text-xs font-bold uppercase text-gray-500">Student Loan Plan</label>
                             <select id="slType" class="w-full mt-1 p-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
                                 <option value="none">No Student Loan</option>
-                                <option value="plan1">Plan 1 (UK Pre-2012)</option>
-                                <option value="plan2">Plan 2 (Eng/Wal 2012-2023)</option>
-                                <option value="plan4">Plan 4 (Scotland)</option>
-                                <option value="plan5">Plan 5 (Eng/Wal 2023+)</option>
+                                <option value="plan1">Plan 1</option>
+                                <option value="plan2">Plan 2</option>
+                                <option value="plan4">Plan 4 (Scottish)</option>
+                                <option value="plan5">Plan 5</option>
                                 <option value="postgrad">Postgraduate Loan</option>
                             </select>
                         </div>
@@ -54,124 +60,133 @@
                 <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-blue-100 flex flex-col md:flex-row justify-between items-center">
                     <div>
                         <h2 class="text-gray-500 font-bold text-sm uppercase tracking-wider">Total Savings Pot Goal</h2>
-                        <p class="text-sm text-gray-400 mb-2">For Jan 31st (Last Year + 50% Advance)</p>
+                        <p class="text-sm text-gray-400 mb-2">Recommended savings to date</p>
                         <div class="text-6xl font-black text-blue-900">£<span id="totalToSave">0.00</span></div>
                     </div>
                     <div class="mt-6 md:mt-0 text-right space-y-1">
                         <div class="text-sm font-semibold text-slate-600">Breakdown:</div>
                         <div class="text-xs">Income Tax: <span id="resIncomeTax" class="font-bold">£0.00</span></div>
                         <div class="text-xs">Class 4 NI: <span id="resNI" class="font-bold">£0.00</span></div>
+                        <div class="text-xs">Student Loan: <span id="resSL" class="font-bold">£0.00</span></div>
                         <div class="text-xs text-orange-600">Jan POA Advance: <span id="resPOA" class="font-bold">£0.00</span></div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-blue-50 p-6 rounded-2xl border border-blue-200">
-                        <h3 class="text-blue-800 font-bold flex items-center mb-2">
-                            <span class="mr-2 italic">🗓️</span> Jan 31, 2027
+                        <h3 class="text-blue-800 font-bold flex items-center mb-2 text-sm uppercase tracking-tight">
+                            📅 First Deadline: <span class="janDate ml-1">Jan 2027</span>
                         </h3>
                         <p class="text-xs text-blue-700 leading-relaxed">
-                            You pay the full tax for 2025/26 plus the first half of the 2026/27 estimate.
+                            Total Due: Current Tax/NI + Student Loan + 1st Payment on Account (50%).
                         </p>
-                        <div class="mt-4 text-xl font-bold text-blue-900">£<span id="janBill">0.00</span></div>
+                        <div class="mt-4 text-2xl font-black text-blue-900">£<span id="janBill">0.00</span></div>
                     </div>
 
                     <div class="bg-orange-50 p-6 rounded-2xl border border-orange-200">
-                        <h3 class="text-orange-800 font-bold flex items-center mb-2">
-                            <span class="mr-2 italic">☀️</span> July 31, 2027
+                        <h3 class="text-orange-800 font-bold flex items-center mb-2 text-sm uppercase tracking-tight">
+                            ☀️ Second Deadline: <span class="julyDate ml-1">July 2027</span>
                         </h3>
                         <p class="text-xs text-orange-700 leading-relaxed">
-                            The second half of your 2026/27 advance payment is due. Keep this saved!
+                            Payment on Account 2: The remaining 50% advance for the year.
                         </p>
-                        <div class="mt-4 text-xl font-bold text-orange-900">£<span id="julyBill">0.00</span></div>
+                        <div class="mt-4 text-2xl font-black text-orange-900">£<span id="julyBill">0.00</span></div>
                     </div>
                 </div>
 
-                <div class="bg-gray-800 text-gray-300 p-4 rounded-xl text-[11px] leading-relaxed italic">
-                    * Calculation logic: Student loan is calculated on total income then adjusted for payments likely made via PAYE. Payments on account (POA) are triggered if the tax bill is over £1,000.
+                <div class="bg-green-50 p-5 rounded-2xl border border-green-200">
+                    <h3 class="text-green-800 font-bold flex items-center text-sm uppercase tracking-tight">
+                        🏁 Final Balancing: <span class="finalDate ml-1">Jan 2028</span>
+                    </h3>
+                    <p class="text-[11px] mt-1 text-green-700 italic">This accounts for the actual work done today vs what you've prepaid.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const uiFields = ['payeIncome', 'stIncome', 'stExpenses', 'slType'];
-        uiFields.forEach(id => document.getElementById(id).addEventListener('input', update));
+        // Data for different tax years
+        const years = {
+            "2026": {
+                pa: 12570, basic: 50270, additional: 125140,
+                sl: { plan1: 26900, plan2: 29385, plan4: 33795, plan5: 25000, postgrad: 21000 },
+                dates: { jan: 'Jan 31, 2027', july: 'July 31, 2027', final: 'Jan 31, 2028' }
+            },
+            "2025": {
+                pa: 12570, basic: 50270, additional: 125140,
+                sl: { plan1: 24990, plan2: 28470, plan4: 31395, plan5: 25000, postgrad: 21000 },
+                dates: { jan: 'Jan 31, 2026', july: 'July 31, 2026', final: 'Jan 31, 2027' }
+            }
+        };
+
+        const inputs = ['payeIncome', 'stIncome', 'stExpenses', 'slType', 'taxYear'];
+        inputs.forEach(id => document.getElementById(id).addEventListener('input', update));
 
         function update() {
+            const yKey = document.getElementById('taxYear').value;
+            const y = years[yKey];
+            
             const paye = parseFloat(document.getElementById('payeIncome').value) || 0;
-            const income = parseFloat(document.getElementById('stIncome').value) || 0;
-            const expenses = parseFloat(document.getElementById('stExpenses').value) || 0;
-            const slType = document.getElementById('slType').value;
-            const profit = Math.max(0, income - expenses);
+            const profit = Math.max(0, (parseFloat(document.getElementById('stIncome').value) || 0) - (parseFloat(document.getElementById('stExpenses').value) || 0));
             const totalAnnual = paye + profit;
+            const slType = document.getElementById('slType').value;
 
-            // 2026/27 Rules
-            const PA = 12570;
-            const BASIC = 50270;
-            const ADDITIONAL = 125140;
-
-            // 1. Income Tax (Handles PAYE offset)
-            function calcTax(amount) {
+            // 1. Income Tax Calculation
+            const getIT = (amount) => {
                 let tax = 0;
-                let allowance = amount > 100000 ? Math.max(0, PA - ((amount - 100000) / 2)) : PA;
-                
-                if (amount > ADDITIONAL) {
-                    tax += (amount - ADDITIONAL) * 0.45;
-                    tax += (ADDITIONAL - BASIC) * 0.4;
-                    tax += (BASIC - allowance) * 0.2;
-                } else if (amount > BASIC) {
-                    tax += (amount - BASIC) * 0.4;
-                    tax += (BASIC - allowance) * 0.2;
+                let allowance = amount > 100000 ? Math.max(0, y.pa - ((amount - 100000) / 2)) : y.pa;
+                if (amount > y.additional) {
+                    tax += (amount - y.additional) * 0.45 + (y.additional - y.basic) * 0.4 + (y.basic - allowance) * 0.2;
+                } else if (amount > y.basic) {
+                    tax += (amount - y.basic) * 0.4 + (y.basic - allowance) * 0.2;
                 } else if (amount > allowance) {
                     tax += (amount - allowance) * 0.2;
                 }
                 return tax;
-            }
-            const stTaxOnly = Math.max(0, calcTax(totalAnnual) - calcTax(paye));
-
-            // 2. Class 4 NI (Self-Employed only)
-            let ni = 0;
-            if (profit > BASIC) {
-                ni += (profit - BASIC) * 0.02 + (BASIC - PA) * 0.06;
-            } else if (profit > PA) {
-                ni += (profit - PA) * 0.06;
-            }
-
-            // 3. Student Loan (Offsets PAYE payments)
-            const slRates = {
-                plan1: { t: 26900, r: 0.09 },
-                plan2: { t: 29385, r: 0.09 },
-                plan4: { t: 33795, r: 0.09 },
-                plan5: { t: 25000, r: 0.09 },
-                postgrad: { t: 21000, r: 0.06 },
-                none: { t: 999999, r: 0 }
             };
-            const s = slRates[slType];
-            const totalSL = Math.max(0, (totalAnnual - s.t) * s.r);
-            const payeSL = Math.max(0, (paye - s.t) * s.r);
-            const stSL = totalSL - payeSL;
+            const stIT = Math.max(0, getIT(totalAnnual) - getIT(paye));
+
+            // 2. Class 4 NI
+            let ni = 0;
+            if (profit > y.basic) {
+                ni += (profit - y.basic) * 0.02 + (y.basic - y.pa) * 0.06;
+            } else if (profit > y.pa) {
+                ni += (profit - y.pa) * 0.06;
+            }
+
+            // 3. Student Loan Logic
+            let stSL = 0;
+            if (slType !== 'none') {
+                const thresh = y.sl[slType];
+                const rate = slType === 'postgrad' ? 0.06 : 0.09;
+                const totalSL = Math.max(0, (totalAnnual - thresh) * rate);
+                const payeSL = Math.max(0, (paye - thresh) * rate);
+                stSL = totalSL - payeSL;
+            }
 
             // 4. Payments on Account (POA)
-            // If Self-Assessment Tax + NI > £1000, trigger POA
-            const saTaxNI = stTaxOnly + ni;
-            const poaInstallment = saTaxNI > 1000 ? (saTaxNI * 0.5) : 0;
+            const saBase = stIT + ni;
+            const poa = saBase > 1000 ? saBase * 0.5 : 0;
 
-            // Update UI
-            document.getElementById('resIncomeTax').innerText = `£${stTaxOnly.toFixed(2)}`;
+            // UI Update
+            document.getElementById('resIncomeTax').innerText = `£${stIT.toFixed(2)}`;
             document.getElementById('resNI').innerText = `£${ni.toFixed(2)}`;
-            document.getElementById('resPOA').innerText = `£${poaInstallment.toFixed(2)}`;
+            document.getElementById('resSL').innerText = `£${stSL.toFixed(2)}`;
+            document.getElementById('resPOA').innerText = `£${poa.toFixed(2)}`;
             
-            // The January Bill is 100% of current tax + 50% advance + Student Loan
-            const janTotal = saTaxNI + stSL + poaInstallment;
+            const janTotal = saBase + stSL + poa;
             document.getElementById('janBill').innerText = janTotal.toFixed(2);
-            
-            // The July Bill is simply the remaining 50% advance
-            document.getElementById('julyBill').innerText = poaInstallment.toFixed(2);
-            
-            // Total Savings Pot for Jan 31st
-            document.getElementById('totalToSave').innerText = janTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('julyBill').innerText = poa.toFixed(2);
+            document.getElementById('totalToSave').innerText = (janTotal + poa).toLocaleString(undefined, {minimumFractionDigits: 2});
+
+            // Date Labels
+            document.querySelector('.janDate').innerText = y.dates.jan;
+            document.querySelector('.julyDate').innerText = y.dates.july;
+            document.querySelector('.finalDate').innerText = y.dates.final;
         }
+
+        // Initial run
+        update();
     </script>
 </body>
 </html>
