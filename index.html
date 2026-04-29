@@ -11,7 +11,7 @@
     <div class="max-w-4xl mx-auto space-y-6">
         <div class="bg-indigo-900 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-center">
             <div>
-                <h1 class="text-3xl font-black">Tax Savings Pot</h1>
+                <h1 class="text-3xl font-black text-white">Tax Savings Pot</h1>
                 <p class="text-indigo-300">Live 2026/27 Calculation Logic</p>
             </div>
             <select id="taxYear" class="mt-4 md:mt-0 bg-indigo-800 text-white font-bold p-3 rounded-xl border border-indigo-700 outline-none">
@@ -43,7 +43,7 @@
                                 <option value="none">None</option>
                                 <option value="plan1">Plan 1</option>
                                 <option value="plan2">Plan 2</option>
-                                <option value="plan4">Plan 4 (Scotland)</option>
+                                <option value="plan4">Plan 4</option>
                                 <option value="plan5">Plan 5</option>
                                 <option value="postgrad">Postgraduate</option>
                             </select>
@@ -71,25 +71,35 @@
                             <p class="font-black text-indigo-900" id="resSL">£0.00</p>
                         </div>
                         <div class="bg-orange-50 p-3 rounded-xl">
-                            <p class="text-[10px] font-bold text-orange-500 uppercase">POA Advance</p>
+                            <p class="text-[10px] font-bold text-orange-500 uppercase">50% Advance</p>
                             <p class="font-black text-orange-600" id="resPOA">£0.00</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-indigo-950 rounded-[2rem] p-8 text-white shadow-2xl">
-                    <h3 class="font-bold text-indigo-300 mb-6 flex items-center uppercase tracking-widest text-xs">
-                        <span class="mr-2">🚨</span> Filing & Payment Deadline
+                <div class="bg-indigo-950 rounded-[2rem] p-8 text-white shadow-2xl space-y-4">
+                    <h3 class="font-bold text-indigo-300 mb-2 flex items-center uppercase tracking-widest text-xs">
+                        <span class="mr-2">🚨</span> Filing & Payment Deadlines
                     </h3>
+                    
                     <div class="flex justify-between items-center bg-indigo-900 p-6 rounded-2xl border border-indigo-700">
                         <div>
-                            <p class="text-sm font-black text-white" id="mainDeadline">January 31, 2028</p>
-                            <p class="text-[11px] text-indigo-300">Main Tax Return & Final Payment Due</p>
+                            <p class="text-sm font-black text-white" id="janDeadlineLabel">January 31, 2028</p>
+                            <p class="text-[11px] text-indigo-300">Final Bill + 1st Advance</p>
                         </div>
-                        <p class="text-3xl font-black text-indigo-400">£<span id="finalBill">0.00</span></p>
+                        <p class="text-3xl font-black text-indigo-400">£<span id="janBill">0.00</span></p>
                     </div>
-                    <p class="mt-6 text-[10px] text-indigo-400 italic">
-                        Note: If your bill is over £1,000, you will also have two advance payments (POAs) due in Jan and July of the same year.
+
+                    <div class="flex justify-between items-center bg-indigo-900/50 p-6 rounded-2xl border border-indigo-800/30">
+                        <div>
+                            <p class="text-sm font-black text-white" id="julyDeadlineLabel">July 31, 2028</p>
+                            <p class="text-[11px] text-indigo-300">2nd Advance Payment (Final 50%)</p>
+                        </div>
+                        <p class="text-3xl font-black text-orange-400">£<span id="julyBill">0.00</span></p>
+                    </div>
+
+                    <p class="mt-4 text-[10px] text-indigo-400 italic">
+                        Advance payments (POAs) are triggered if your Tax/NI bill is over £1,000.
                     </p>
                 </div>
             </div>
@@ -99,11 +109,13 @@
     <script>
         const config = {
             "2026": {
-                deadline: "January 31, 2028",
+                jan: "January 31, 2028",
+                july: "July 31, 2028",
                 sl: { plan1: 26900, plan2: 29385, plan4: 33795, plan5: 25000, postgrad: 21000 }
             },
             "2025": {
-                deadline: "January 31, 2027",
+                jan: "January 31, 2027",
+                july: "July 31, 2027",
                 sl: { plan1: 24990, plan2: 28470, plan4: 31395, plan5: 25000, postgrad: 21000 }
             }
         };
@@ -119,7 +131,7 @@
             const total = paye + profit;
             const slType = document.getElementById('slType').value;
 
-            // Income Tax Logic
+            // Income Tax
             const getIT = (val) => {
                 let tax = 0;
                 let pa = val > 100000 ? Math.max(0, 12570 - ((val - 100000) / 2)) : 12570;
@@ -130,10 +142,10 @@
             };
             const it = Math.max(0, getIT(total) - getIT(paye));
 
-            // NI Logic
+            // NI
             let ni = (profit > 50270) ? ((profit - 50270) * 0.02 + (50270 - 12570) * 0.06) : (profit > 12570 ? (profit - 12570) * 0.06 : 0);
 
-            // Student Loan
+            // SL
             let sl = 0;
             if (slType !== 'none') {
                 let t = data.sl[slType], r = slType === 'postgrad' ? 0.06 : 0.09;
@@ -143,19 +155,27 @@
             const baseLiability = it + ni;
             const poa = baseLiability > 1000 ? baseLiability * 0.5 : 0;
             
-            // UI Updates
+            // Stats Row
             document.getElementById('resIncomeTax').innerText = `£${it.toFixed(2)}`;
             document.getElementById('resNI').innerText = `£${ni.toFixed(2)}`;
             document.getElementById('resSL').innerText = `£${sl.toFixed(2)}`;
             document.getElementById('resPOA').innerText = `£${poa.toFixed(2)}`;
             
-            // The "Safe Pot" includes Tax + NI + Student Loan + both POA buffers
+            // Total Pot
             const totalPot = baseLiability + sl + (poa * 2);
             document.getElementById('totalToSave').innerText = totalPot.toLocaleString(undefined, {minimumFractionDigits: 2});
             
-            // The Final Bill on the Deadline (Just the liability part)
-            document.getElementById('finalBill').innerText = (baseLiability + sl).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('mainDeadline').innerText = data.deadline;
+            // Timeline Breakdown
+            // Jan = Final Balance for the year + SL + 1st Advance (50% of IT/NI)
+            const janTotal = baseLiability + sl + poa;
+            document.getElementById('janBill').innerText = janTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            
+            // July = 2nd Advance (The remaining 50% of IT/NI)
+            document.getElementById('julyBill').innerText = poa.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+            // Date Labels
+            document.getElementById('janDeadlineLabel').innerText = data.jan;
+            document.getElementById('julyDeadlineLabel').innerText = data.july;
         }
         update();
     </script>
