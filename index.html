@@ -1,232 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMRC Rolling Tax Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 p-4 md:p-10 font-sans">
 
-<style>
-  .tracker { padding: 1rem 0; font-family: var(--font-sans); }
-  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
-  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .input-group { display: flex; flex-direction: column; gap: 4px; }
-  .input-group label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 1rem; }
-  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
-  .metric-label { font-size: 11px; color: var(--color-text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
-  .metric-value { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-top: 2px; }
-  .payment-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
-  .payment-row:last-child { border-bottom: none; }
-  .payment-date { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-  .payment-desc { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
-  .payment-amount { font-size: 20px; font-weight: 500; }
-  .amount-due { color: var(--color-text-primary); }
-  .amount-zero { color: var(--color-text-success); }
-  .amount-credit { color: var(--color-text-info); }
-  .credit-pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--border-radius-md); background: var(--color-background-info); color: var(--color-text-info); margin-left: 8px; }
-  .warning-pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--border-radius-md); background: var(--color-background-warning); color: var(--color-text-warning); margin-left: 8px; }
-  .big-total { font-size: 36px; font-weight: 500; color: var(--color-text-primary); }
-  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1rem 0; }
-  select, input[type=number] { width: 100%; }
-</style>
-
-<div class="tracker">
-  <h2 class="sr-only">HMRC self assessment tax tracker with payment on account cascade</h2>
-
-  <div style="display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr); gap: 16px; align-items: start;">
-
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      <div class="card">
-        <div class="section-label">Tax year</div>
-        <select id="taxYear">
-          <option value="2526">2025 / 26 — filing Jan 2027</option>
-          <option value="2627">2026 / 27 — filing Jan 2028</option>
-        </select>
-      </div>
-
-      <div class="card">
-        <div class="section-label">Income</div>
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
-          <div class="input-group">
-            <label>PAYE salary (gross)</label>
-            <input type="number" id="paye" placeholder="40000" value="40000">
-          </div>
-          <div class="input-group">
-            <label>Sole trader income</label>
-            <input type="number" id="stIncome" placeholder="0" value="5521">
-          </div>
-          <div class="input-group">
-            <label>Business expenses</label>
-            <input type="number" id="stExp" placeholder="0" value="0">
-          </div>
-          <div class="input-group">
-            <label>Student loan plan</label>
-            <select id="slPlan">
-              <option value="none">None</option>
-              <option value="plan1" selected>Plan 1</option>
-              <option value="plan2">Plan 2</option>
-              <option value="plan4">Plan 4</option>
-              <option value="plan5">Plan 5</option>
-              <option value="postgrad">Postgraduate</option>
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="bg-indigo-900 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-black text-white">Tax Savings Pot</h1>
+                <p class="text-indigo-300">Live 2026/27 Calculation Logic</p>
+            </div>
+            <select id="taxYear" class="mt-4 md:mt-0 bg-indigo-800 text-white font-bold p-3 rounded-xl border border-indigo-700 outline-none">
+                <option value="2026">Tax Year: April 2026 - April 2027</option>
+                <option value="2025">Tax Year: April 2025 - April 2026</option>
             </select>
-          </div>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="section-label">PoA credit from last year</div>
-        <div class="input-group" style="margin-top: 4px;">
-          <label>Amount already paid to HMRC</label>
-          <input type="number" id="poaCredit" placeholder="0" value="4367">
-        </div>
-        <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 8px; line-height: 1.5;">Enter the total PoA paid in the previous year. HMRC will cascade this across Jan then Jul before asking for more.</p>
-      </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+                    <h2 class="font-bold text-gray-400 uppercase text-xs tracking-widest mb-6">Income Details</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Annual PAYE Salary (Gross)</label>
+                            <input type="number" id="payeIncome" placeholder="0" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Sole Trader Income</label>
+                            <input type="number" id="stIncome" placeholder="0" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-red-500 mb-1">Total Expenses</label>
+                            <input type="number" id="stExpenses" placeholder="0" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition text-red-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Student Loan Plan</label>
+                            <select id="slType" class="w-full p-3 bg-gray-50 border rounded-xl outline-none text-sm font-semibold">
+                                <option value="none">None</option>
+                                <option value="plan1">Plan 1</option>
+                                <option value="plan2">Plan 2</option>
+                                <option value="plan4">Plan 4</option>
+                                <option value="plan5">Plan 5</option>
+                                <option value="postgrad">Postgraduate</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-      <div class="card">
-        <div class="section-label">Next year projection (for 27/28 PoA)</div>
-        <div class="input-group" style="margin-top: 4px;">
-          <label>Estimated sole trader profit</label>
-          <input type="number" id="nextYearProfit" placeholder="Same as this year" id="nextYearProfit">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-indigo-50">
+                    <h2 class="text-gray-400 font-bold text-xs uppercase tracking-widest">Total to Save (Safe Pot)</h2>
+                    <div class="text-7xl font-black text-indigo-950 my-2 tracking-tighter">£<span id="totalToSave">0.00</span></div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-gray-100">
+                        <div class="bg-gray-50 p-3 rounded-xl">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase">IT Owed</p>
+                            <p class="font-black text-indigo-900" id="resIncomeTax">£0.00</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase">NI Owed</p>
+                            <p class="font-black text-indigo-900" id="resNI">£0.00</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase">Student Loan</p>
+                            <p class="font-black text-indigo-900" id="resSL">£0.00</p>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded-xl">
+                            <p class="text-[10px] font-bold text-orange-500 uppercase">50% Advance</p>
+                            <p class="font-black text-orange-600" id="resPOA">£0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-950 rounded-[2rem] p-8 text-white shadow-2xl space-y-4">
+                    <h3 class="font-bold text-indigo-300 mb-2 flex items-center uppercase tracking-widest text-xs">
+                        <span class="mr-2">🚨</span> Filing & Payment Deadlines
+                    </h3>
+                    
+                    <div class="flex justify-between items-center bg-indigo-900 p-6 rounded-2xl border border-indigo-700">
+                        <div>
+                            <p class="text-sm font-black text-white" id="janDeadlineLabel">January 31, 2028</p>
+                            <p class="text-[11px] text-indigo-300">Final Bill + 1st Advance</p>
+                        </div>
+                        <p class="text-3xl font-black text-indigo-400">£<span id="janBill">0.00</span></p>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-indigo-900/50 p-6 rounded-2xl border border-indigo-800/30">
+                        <div>
+                            <p class="text-sm font-black text-white" id="julyDeadlineLabel">July 31, 2028</p>
+                            <p class="text-[11px] text-indigo-300">2nd Advance Payment (Final 50%)</p>
+                        </div>
+                        <p class="text-3xl font-black text-orange-400">£<span id="julyBill">0.00</span></p>
+                    </div>
+
+                    <p class="mt-4 text-[10px] text-indigo-400 italic">
+                        Advance payments (POAs) are triggered if your Tax/NI bill is over £1,000.
+                    </p>
+                </div>
+            </div>
         </div>
-        <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 8px; line-height: 1.5;">Leave blank to use this year's profit as the estimate.</p>
-      </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      <div class="card">
-        <div class="section-label">This year's liability breakdown</div>
-        <div class="metric-grid" id="metricsRow"></div>
-      </div>
+    <script>
+        const config = {
+            "2026": {
+                jan: "January 31, 2028",
+                july: "July 31, 2028",
+                sl: { plan1: 26900, plan2: 29385, plan4: 33795, plan5: 25000, postgrad: 21000 }
+            },
+            "2025": {
+                jan: "January 31, 2027",
+                july: "July 31, 2027",
+                sl: { plan1: 24990, plan2: 28470, plan4: 31395, plan5: 25000, postgrad: 21000 }
+            }
+        };
 
-      <div class="card">
-        <div class="section-label">Total to save</div>
-        <div class="big-total" id="totalSave">£0.00</div>
-        <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;" id="totalNote"></p>
-      </div>
+        const inputs = ['payeIncome', 'stIncome', 'stExpenses', 'slType', 'taxYear'];
+        inputs.forEach(id => document.getElementById(id).addEventListener('input', update));
 
-      <div class="card">
-        <div class="section-label">Payment timeline</div>
-        <div id="timeline"></div>
-      </div>
-    </div>
-  </div>
-</div>
+        function update() {
+            const yKey = document.getElementById('taxYear').value;
+            const data = config[yKey];
+            const paye = parseFloat(document.getElementById('payeIncome').value) || 0;
+            const profit = Math.max(0, (parseFloat(document.getElementById('stIncome').value) || 0) - (parseFloat(document.getElementById('stExpenses').value) || 0));
+            const total = paye + profit;
+            const slType = document.getElementById('slType').value;
 
-<script>
-const SL_THRESHOLDS = {
-  "2526": { plan1: 24990, plan2: 28470, plan4: 31395, plan5: 25000, postgrad: 21000 },
-  "2627": { plan1: 26065, plan2: 29385, plan4: 32745, plan5: 25000, postgrad: 21000 }
-};
-const DATES = {
-  "2526": { jan: "31 Jan 2027", jul: "31 Jul 2027", jan2: "31 Jan 2028", jul2: "31 Jul 2028" },
-  "2627": { jan: "31 Jan 2028", jul: "31 Jul 2028", jan2: "31 Jan 2029", jul2: "31 Jul 2029" }
-};
+            // Income Tax
+            const getIT = (val) => {
+                let tax = 0;
+                let pa = val > 100000 ? Math.max(0, 12570 - ((val - 100000) / 2)) : 12570;
+                if (val > 125140) tax += (val - 125140) * 0.45 + (125140 - 50270) * 0.4 + (50270 - pa) * 0.2;
+                else if (val > 50270) tax += (val - 50270) * 0.4 + (50270 - pa) * 0.2;
+                else if (val > pa) tax += (val - pa) * 0.2;
+                return tax;
+            };
+            const it = Math.max(0, getIT(total) - getIT(paye));
 
-function fmt(n) {
-  if (n < 0) return '-£' + Math.abs(n).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  return '£' + n.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-}
+            // NI
+            let ni = (profit > 50270) ? ((profit - 50270) * 0.02 + (50270 - 12570) * 0.06) : (profit > 12570 ? (profit - 12570) * 0.06 : 0);
 
-function calcIT(total, paye) {
-  function it(v) {
-    let pa = v > 100000 ? Math.max(0, 12570 - ((v - 100000) / 2)) : 12570;
-    let tax = 0;
-    if (v > 125140) tax = (v - 125140) * 0.45 + (125140 - 50270) * 0.4 + Math.max(0, 50270 - pa) * 0.2;
-    else if (v > 50270) tax = (v - 50270) * 0.4 + Math.max(0, 50270 - pa) * 0.2;
-    else if (v > pa) tax = (v - pa) * 0.2;
-    return tax;
-  }
-  return Math.max(0, it(total) - it(paye));
-}
+            // SL
+            let sl = 0;
+            if (slType !== 'none') {
+                let t = data.sl[slType], r = slType === 'postgrad' ? 0.06 : 0.09;
+                sl = Math.max(0, (total - t) * r) - Math.max(0, (paye - t) * r);
+            }
 
-function calcNI(profit) {
-  if (profit > 50270) return (profit - 50270) * 0.02 + (50270 - 12570) * 0.06;
-  if (profit > 12570) return (profit - 12570) * 0.06;
-  return 0;
-}
+            const baseLiability = it + ni;
+            const poa = baseLiability > 1000 ? baseLiability * 0.5 : 0;
+            
+            // Stats Row
+            document.getElementById('resIncomeTax').innerText = `£${it.toFixed(2)}`;
+            document.getElementById('resNI').innerText = `£${ni.toFixed(2)}`;
+            document.getElementById('resSL').innerText = `£${sl.toFixed(2)}`;
+            document.getElementById('resPOA').innerText = `£${poa.toFixed(2)}`;
+            
+            // Total Pot
+            const totalPot = baseLiability + sl + (poa * 2);
+            document.getElementById('totalToSave').innerText = totalPot.toLocaleString(undefined, {minimumFractionDigits: 2});
+            
+            // Timeline Breakdown
+            // Jan = Final Balance for the year + SL + 1st Advance (50% of IT/NI)
+            const janTotal = baseLiability + sl + poa;
+            document.getElementById('janBill').innerText = janTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            
+            // July = 2nd Advance (The remaining 50% of IT/NI)
+            document.getElementById('julyBill').innerText = poa.toLocaleString(undefined, {minimumFractionDigits: 2});
 
-function calcSL(total, paye, plan, year) {
-  if (plan === 'none') return 0;
-  const t = SL_THRESHOLDS[year][plan];
-  const r = plan === 'postgrad' ? 0.06 : 0.09;
-  return Math.max(0, (total - t) * r) - Math.max(0, (paye - t) * r);
-}
-
-function update() {
-  const year = document.getElementById('taxYear').value;
-  const paye = parseFloat(document.getElementById('paye').value) || 0;
-  const stRaw = parseFloat(document.getElementById('stIncome').value) || 0;
-  const exp = parseFloat(document.getElementById('stExp').value) || 0;
-  const profit = Math.max(0, stRaw - exp);
-  const total = paye + profit;
-  const plan = document.getElementById('slPlan').value;
-  const credit = parseFloat(document.getElementById('poaCredit').value) || 0;
-  const nextRaw = parseFloat(document.getElementById('nextYearProfit').value);
-  const nextProfit = isNaN(nextRaw) ? profit : nextRaw;
-
-  const it = calcIT(total, paye);
-  const ni = calcNI(profit);
-  const sl = calcSL(total, paye, plan, year);
-  const baseLiability = it + ni;
-  const poa = baseLiability > 1000 ? baseLiability * 0.5 : 0;
-
-  const nextIT = calcIT(paye + nextProfit, paye);
-  const nextNI = calcNI(nextProfit);
-  const nextBase = nextIT + nextNI;
-  const nextPoa = nextBase > 1000 ? nextBase * 0.5 : 0;
-
-  let remaining = credit;
-
-  let janRaw = baseLiability + sl + poa;
-  let janDue = Math.max(0, janRaw - remaining);
-  remaining = Math.max(0, remaining - janRaw);
-
-  let julDue = Math.max(0, poa - remaining);
-  remaining = Math.max(0, remaining - poa);
-
-  let jan2Raw = nextBase + calcSL(paye + nextProfit, paye, plan, year) + nextPoa;
-  let jan2Due = Math.max(0, jan2Raw - remaining);
-  remaining = Math.max(0, remaining - jan2Raw);
-
-  let jul2Due = Math.max(0, nextPoa - remaining);
-  remaining = Math.max(0, remaining - nextPoa);
-
-  const totalToSave = janDue + julDue + jan2Due + jul2Due;
-  const d = DATES[year];
-
-  document.getElementById('metricsRow').innerHTML = `
-    <div class="metric"><div class="metric-label">Income tax</div><div class="metric-value">${fmt(it)}</div></div>
-    <div class="metric"><div class="metric-label">Class 4 NI</div><div class="metric-value">${fmt(ni)}</div></div>
-    <div class="metric"><div class="metric-label">Student loan</div><div class="metric-value">${fmt(sl)}</div></div>
-    <div class="metric"><div class="metric-label">PoA (50%)</div><div class="metric-value">${fmt(poa)}</div></div>
-  `;
-
-  document.getElementById('totalSave').textContent = fmt(totalToSave);
-  document.getElementById('totalNote').textContent = credit > 0
-    ? `After offsetting £${credit.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2})} PoA credit across all payment dates`
-    : 'No PoA credit applied';
-
-  function paymentRow(date, desc, amount, extraTag) {
-    const isZero = amount <= 0.005;
-    const cls = isZero ? 'amount-zero' : 'amount-due';
-    const tag = extraTag || '';
-    return `<div class="payment-row">
-      <div>
-        <div class="payment-date">${date}${tag}</div>
-        <div class="payment-desc">${desc}</div>
-      </div>
-      <div class="payment-amount ${cls}">${isZero ? '£0.00' : fmt(amount)}</div>
-    </div>`;
-  }
-
-  const jan2Note = isNaN(nextRaw) ? '<span class="warning-pill">estimated</span>' : '';
-  const jul2Note = isNaN(nextRaw) ? '<span class="warning-pill">estimated</span>' : '';
-
-  document.getElementById('timeline').innerHTML =
-    paymentRow(d.jan, 'Balancing payment + 1st PoA advance', janDue, credit > 0 && janRaw > 0 ? '<span class="credit-pill">credit applied</span>' : '') +
-    paymentRow(d.jul, '2nd PoA advance', julDue, remaining > 0 && poa > 0 ? '<span class="credit-pill">credit applied</span>' : '') +
-    paymentRow(d.jan2, 'Balancing payment + 1st PoA advance (27/28)', jan2Due, jan2Note) +
-    paymentRow(d.jul2, '2nd PoA advance (27/28)', jul2Due, jul2Note) +
-    (remaining > 0.01 ? `<div style="margin-top:10px; font-size:12px; color: var(--color-text-info); background: var(--color-background-info); border-radius: var(--border-radius-md); padding: 8px 12px;">Credit still remaining after all payments: ${fmt(remaining)}</div>` : '');
-}
-
-['taxYear','paye','stIncome','stExp','slPlan','poaCredit','nextYearProfit'].forEach(id => {
-  document.getElementById(id).addEventListener('input', update);
-});
-update();
-</script>
+            // Date Labels
+            document.getElementById('janDeadlineLabel').innerText = data.jan;
+            document.getElementById('julyDeadlineLabel').innerText = data.july;
+        }
+        update();
+    </script>
+</body>
+</html>
